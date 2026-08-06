@@ -1,0 +1,81 @@
+# ---- Secrets & local config -------------------------------------------------
+.env
+.env.*
+!.env.example
+config/local.yaml
+*.pem
+*.key
+
+# ---- Data artifacts ---------------------------------------------------------
+# The warehouse and scraped payloads are regenerable and may contain seller PII.
+# Directory structure is tracked via .gitkeep; contents are not.
+data/**
+!data/**/
+!data/**/.gitkeep
+*.db
+*.sqlite
+*.sqlite3
+*.duckdb
+
+# ---- Python -----------------------------------------------------------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib60/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ---- Virtual environments ---------------------------------------------------
+.venv/
+venv/
+ENV/
+env/
+.python-version
+
+# ---- Testing & tooling caches ----------------------------------------------
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+.coverage.*
+coverage.xml
+htmlcov/
+.tox/
+.nox/
+.hypothesis/
+
+# ---- Notebooks --------------------------------------------------------------
+.ipynb_checkpoints/
+notebooks/**/*.ipynb
+!notebooks/.gitkeep
+
+# ---- Streamlit --------------------------------------------------------------
+.streamlit/secrets.toml
+
+# ---- Editors & OS -----------------------------------------------------------
+.vscode/
+.idea/
+*.swp
+*~
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ---- Logs -------------------------------------------------------------------
+*.log
+logs/

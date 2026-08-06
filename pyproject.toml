@@ -1,0 +1,119 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "micro-trend-arbitrage-engine"
+version = "0.1.0"
+description = "Detects undervalued alternative/streetwear resale listings using multi-modal AI and surfaces them as ranked arbitrage opportunities."
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+authors = [{ name = "Jason" }]
+keywords = ["data-engineering", "resale", "arbitrage", "etl", "llm"]
+
+dependencies = [
+    # --- Ingestion: async HTTP, retries, HTML parsing ---
+    "httpx>=0.27",
+    "tenacity>=9.0",
+    "beautifulsoup4>=4.12",
+    "lxml>=5.3",
+
+    # --- Contracts: typed schemas shared across every layer ---
+    "pydantic>=2.9",
+    "pydantic-settings>=2.6",
+
+    # --- Processing: vision/LLM enrichment + fuzzy comp matching ---
+    "anthropic>=0.116",
+    "rapidfuzz>=3.10",
+
+    # --- Storage ---
+    "SQLAlchemy>=2.0",
+
+    # --- Presentation & analysis ---
+    "streamlit>=1.40",
+    "pandas>=2.2",
+    "plotly>=5.24",
+
+    # --- Operational plumbing ---
+    "typer>=0.15",
+    "structlog>=24.4",
+    "rich>=13.9",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8.3",
+    "pytest-asyncio>=0.24",
+    "pytest-cov>=6.0",
+    "respx>=0.21",         # mock httpx at the transport layer, so scraper tests never touch the network
+    "ruff>=0.8",
+    "mypy>=1.13",
+    "pre-commit>=4.0",
+    "types-beautifulsoup4",
+]
+postgres = ["psycopg[binary]>=3.2"]
+
+[project.scripts]
+mta = "mta.pipeline.cli:app"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mta"]
+
+# -----------------------------------------------------------------------------
+# Tooling
+# -----------------------------------------------------------------------------
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E", "W",   # pycodestyle
+    "F",        # pyflakes
+    "I",        # isort
+    "B",        # flake8-bugbear
+    "UP",       # pyupgrade
+    "ANN",      # flake8-annotations  -> enforces RULE 3 type hinting
+    "D",        # pydocstyle          -> enforces RULE 3 docstrings
+    "S",        # flake8-bandit
+    "C4", "SIM", "RET", "ARG",
+]
+ignore = [
+    "D203",  # conflicts with D211
+    "D213",  # conflicts with D212
+    "ANN401",
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = ["D", "S101", "ANN"]   # asserts and undocumented fixtures are fine in tests
+"src/mta/dashboard/**/*.py" = ["D103"]   # Streamlit render functions read top-to-bottom
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.mypy]
+python_version = "3.11"
+strict = true
+warn_unreachable = true
+plugins = ["pydantic.mypy"]
+mypy_path = "src"
+
+[[tool.mypy.overrides]]
+module = ["streamlit.*", "plotly.*", "bs4.*"]
+ignore_missing_imports = true
+
+[tool.pytest.ini_options]
+minversion = "8.0"
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+addopts = "-ra --strict-markers --cov=mta --cov-report=term-missing"
+markers = [
+    "integration: touches the database or the network; excluded from the default CI gate",
+]
+
+[tool.coverage.report]
+exclude_lines = ["pragma: no cover", "if TYPE_CHECKING:", "raise NotImplementedError"]
