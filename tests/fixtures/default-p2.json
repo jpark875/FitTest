@@ -1,0 +1,95 @@
+{
+  "meta": {
+    "recorded_at": "2026-08-01T10:04:12Z",
+    "query": "default",
+    "page": 2,
+    "note": "Second page. fx-1003 repeats from page 1; marketplaces re-order between requests."
+  },
+  "listings": [
+    {
+      "id": "fx-1003",
+      "url": "https://fixture.invalid/products/fx-1003",
+      "title": "Arc'teryx Beta LT shell - discontinued colourway",
+      "description": "Gore-Tex, taped seams intact, DWR still beading. Small scuff on the left shoulder.",
+      "price": "£135.00",
+      "condition": "Used - like new",
+      "brand": "Arc'teryx",
+      "size": "M",
+      "seller": "gorp_supply",
+      "images": [
+        "https://media.fixture.invalid/fx-1003/1.jpg",
+        "https://media.fixture.invalid/fx-1003/2.jpg"
+      ],
+      "listed_at": "2026-07-31T19:10:00Z"
+    },
+    {
+      "id": "fx-1009",
+      "url": "https://fixture.invalid/products/fx-1009",
+      "title": "Vintage Patagonia Synchilla Snap-T, teal, 90s",
+      "description": "Ten photos because the colour is hard to capture. No pilling worth mentioning.",
+      "price": "£72",
+      "condition": "Used - good",
+      "brand": "Patagonia",
+      "size": "M",
+      "seller": "gorp_supply",
+      "images": [
+        "https://media.fixture.invalid/fx-1009/1.jpg",
+        "https://media.fixture.invalid/fx-1009/2.jpg",
+        "https://media.fixture.invalid/fx-1009/3.jpg",
+        "https://media.fixture.invalid/fx-1009/4.jpg",
+        "https://media.fixture.invalid/fx-1009/5.jpg",
+        "https://media.fixture.invalid/fx-1009/6.jpg",
+        "https://media.fixture.invalid/fx-1009/7.jpg",
+        "https://media.fixture.invalid/fx-1009/8.jpg",
+        "https://media.fixture.invalid/fx-1009/9.jpg",
+        "https://media.fixture.invalid/fx-1009/10.jpg"
+      ],
+      "listed_at": "2026-07-25T12:00:00Z"
+    },
+    {
+      "id": "fx-1010",
+      "url": "https://fixture.invalid/products/fx-1010",
+      "title": "Grunge flannel overshirt, oversized, red check",
+      "description": "No photos on this one yet, will add later!",
+      "price": "£16.00",
+      "condition": "Used",
+      "brand": null,
+      "size": "XL",
+      "seller": "seattle_by_post",
+      "images": [],
+      "listed_at": "2026-08-01T06:30:00Z"
+    },
+    {
+      "id": "fx-1011",
+      "url": "https://fixture.invalid/products/fx-1011",
+      "title": "Maharishi snopants, archive, snow camo",
+      "description": "Early 2000s. Rare colourway, priced accordingly.",
+      "price": "£1,299.00",
+      "condition": "Excellent",
+      "brand": "Maharishi",
+      "size": "M",
+      "seller": "archive_only",
+      "images": [
+        "https://media.fixture.invalid/fx-1011/1.jpg",
+        "https://media.fixture.invalid/fx-1011/2.jpg",
+        "https://media.fixture.invalid/fx-1011/3.jpg"
+      ],
+      "listed_at": "2026-06-19T17:44:00Z"
+    },
+    {
+      "id": "fx-1012",
+      "url": "https://fixture.invalid/products/fx-1012",
+      "title": "Ed Hardy zip hoodie, y2k, tiger print",
+      "description": "Priced in euros because I'm posting from Berlin.",
+      "price": "34,50 EUR",
+      "condition": "Used - good",
+      "brand": "Ed Hardy",
+      "size": "S",
+      "seller": "kreuzberg_kilo",
+      "images": [
+        "https://media.fixture.invalid/fx-1012/1.jpg"
+      ],
+      "listed_at": "2026-07-20T10:10:00Z"
+    }
+  ]
+}

@@ -1,0 +1,76 @@
+{
+  "meta": {
+    "recorded_at": "2026-08-01T10:11:30Z",
+    "query": "vintage carhartt jacket",
+    "page": 1,
+    "note": "Query-specific recording. Demonstrates slug resolution beating the default set."
+  },
+  "listings": [
+    {
+      "id": "fx-2001",
+      "url": "https://fixture.invalid/products/fx-2001",
+      "title": "Carhartt Detroit jacket, 90s, brown duck, blanket lined",
+      "description": "The classic. Corduroy collar, both hand warmer pockets intact.",
+      "price": "£95.00",
+      "condition": "Used - like new",
+      "brand": "Carhartt",
+      "size": "L",
+      "seller": "midwest_workwear",
+      "images": [
+        "https://media.fixture.invalid/fx-2001/1.jpg",
+        "https://media.fixture.invalid/fx-2001/2.jpg",
+        "https://media.fixture.invalid/fx-2001/3.jpg"
+      ],
+      "listed_at": "2026-07-30T15:00:00Z"
+    },
+    {
+      "id": "fx-2002",
+      "url": "https://fixture.invalid/products/fx-2002",
+      "title": "Carhartt chore coat, faded black, thrashed",
+      "description": "Paint splatter and a repaired elbow. Genuinely worn, not distressed for the look.",
+      "price": "£38",
+      "condition": "Used - fair",
+      "brand": "Carhartt",
+      "size": "XL",
+      "seller": "yard_sale_uk",
+      "images": [
+        "https://media.fixture.invalid/fx-2002/1.jpg",
+        "https://media.fixture.invalid/fx-2002/2.jpg"
+      ],
+      "listed_at": "2026-07-24T08:20:00Z"
+    },
+    {
+      "id": "fx-2003",
+      "url": "https://fixture.invalid/products/fx-2003",
+      "title": "Carhartt WIP Michigan coat, hamilton brown",
+      "description": "Current season WIP, not vintage, listed here because the seller tagged it vintage.",
+      "price": "£140.00",
+      "condition": "New with tags",
+      "brand": "Carhartt WIP",
+      "size": "M",
+      "seller": "soho_resell",
+      "images": [
+        "https://media.fixture.invalid/fx-2003/1.jpg"
+      ],
+      "listed_at": "2026-08-01T09:55:00Z"
+    },
+    {
+      "id": "fx-2004",
+      "url": "https://fixture.invalid/products/fx-2004",
+      "title": "Carhartt Active hooded jacket, 1998, moss green",
+      "description": "Union made tag. Small tear in the lining, shell is perfect.",
+      "price": "£64.00",
+      "condition": "Used - good",
+      "brand": "Carhartt",
+      "size": "L",
+      "seller": "midwest_workwear",
+      "images": [
+        "https://media.fixture.invalid/fx-2004/1.jpg",
+        "https://media.fixture.invalid/fx-2004/2.jpg",
+        "https://media.fixture.invalid/fx-2004/3.jpg",
+        "https://media.fixture.invalid/fx-2004/4.jpg"
+      ],
+      "listed_at": "2026-07-18T13:41:00Z"
+    }
+  ]
+}

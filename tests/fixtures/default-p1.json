@@ -1,0 +1,137 @@
+{
+  "meta": {
+    "recorded_at": "2026-08-01T10:04:00Z",
+    "query": "default",
+    "page": 1,
+    "note": "Synthetic listings. Hosts use the reserved .invalid TLD and never resolve."
+  },
+  "listings": [
+    {
+      "id": "fx-1001",
+      "url": "https://fixture.invalid/products/fx-1001",
+      "title": "Vintage 90s Carhartt Detroit jacket - brown duck canvas",
+      "description": "Genuine 90s Detroit jacket, blanket lined. Fits like a modern L. Minor fading at the cuffs which is honestly the best part.",
+      "price": "£48",
+      "condition": "Used - good",
+      "brand": "Carhartt",
+      "size": "L",
+      "seller": "northern_thrift",
+      "images": [
+        "https://media.fixture.invalid/fx-1001/1.jpg",
+        "https://media.fixture.invalid/fx-1001/2.jpg",
+        "https://media.fixture.invalid/fx-1001/3.jpg"
+      ],
+      "listed_at": "2026-07-28T14:02:00Z"
+    },
+    {
+      "id": "fx-1002",
+      "url": "https://fixture.invalid/products/fx-1002",
+      "title": "Y2K low rise cargo trousers, khaki, tie hem",
+      "description": "Deadstock feel, never worn. Waist 28.",
+      "price": "£22.50",
+      "condition": "New with tags",
+      "brand": null,
+      "size": "S",
+      "seller": "millenniumgirl",
+      "images": [
+        "https://media.fixture.invalid/fx-1002/1.jpg",
+        "https://media.fixture.invalid/fx-1002/2.jpg"
+      ],
+      "listed_at": "2026-07-30T08:45:00Z"
+    },
+    {
+      "id": "fx-1003",
+      "url": "https://fixture.invalid/products/fx-1003",
+      "title": "Arc'teryx Beta LT shell - discontinued colourway",
+      "description": "Gore-Tex, taped seams intact, DWR still beading. Small scuff on the left shoulder.",
+      "price": "£135.00",
+      "condition": "Used - like new",
+      "brand": "Arc'teryx",
+      "size": "M",
+      "seller": "gorp_supply",
+      "images": [
+        "https://media.fixture.invalid/fx-1003/1.jpg",
+        "https://media.fixture.invalid/fx-1003/2.jpg",
+        "https://media.fixture.invalid/fx-1003/3.jpg",
+        "https://media.fixture.invalid/fx-1003/4.jpg"
+      ],
+      "listed_at": "2026-07-31T19:10:00Z"
+    },
+    {
+      "id": "fx-1004",
+      "url": "https://fixture.invalid/products/fx-1004",
+      "title": "Nirvana In Utero tour tee, single stitch, 1993",
+      "description": "Thin and soft, small hole near the hem. Reads XL on the tag, fits like a modern L.",
+      "price": "£190",
+      "condition": "Used - fair",
+      "brand": null,
+      "size": "XL",
+      "seller": "vinyl_and_tees",
+      "images": [
+        "https://media.fixture.invalid/fx-1004/1.jpg",
+        "https://media.fixture.invalid/fx-1004/2.jpg"
+      ],
+      "listed_at": "2026-07-22T11:38:00Z"
+    },
+    {
+      "id": "fx-1005",
+      "url": "https://fixture.invalid/products/fx-1005",
+      "title": "Baggy skate jeans, mid wash, thrashed hems",
+      "description": "Proper wide leg. 34 waist, 32 leg.",
+      "price": "18",
+      "condition": "Used",
+      "brand": "Levi's",
+      "size": "34",
+      "seller": "curb_cut_vintage",
+      "images": [
+        "https://media.fixture.invalid/fx-1005/1.jpg"
+      ],
+      "listed_at": "2026-08-01T07:15:00Z"
+    },
+    {
+      "id": "fx-1006",
+      "url": "https://fixture.invalid/products/fx-1006",
+      "title": "Stussy heavyweight hoodie, faded black",
+      "description": "Bought this in 2019, worn maybe ten times.",
+      "price": "£40.00",
+      "condition": "Excellent",
+      "brand": "Stussy",
+      "size": "M",
+      "seller": "eastlondonarchive",
+      "images": [
+        "https://media.fixture.invalid/fx-1006/1.jpg",
+        "https://media.fixture.invalid/fx-1006/2.jpg"
+      ],
+      "listed_at": "2026-07-29T16:20:00Z"
+    },
+    {
+      "id": "fx-1007",
+      "url": "https://fixture.invalid/products/fx-1007",
+      "title": "Dickies 874 work trousers, olive, W32",
+      "description": "make me an offer :)",
+      "price": "offers only",
+      "condition": "Used - good",
+      "brand": "Dickies",
+      "size": "32",
+      "seller": "workwear_bristol",
+      "images": [
+        "https://media.fixture.invalid/fx-1007/1.jpg"
+      ],
+      "listed_at": "2026-07-27T13:05:00Z"
+    },
+    {
+      "id": "fx-1008",
+      "title": "Coquette lace trim cardigan, cream",
+      "description": "This record is missing its url, which the contract will not accept.",
+      "price": "£26",
+      "condition": "Excellent",
+      "brand": null,
+      "size": "S",
+      "seller": "ribbonsandbows",
+      "images": [
+        "https://media.fixture.invalid/fx-1008/1.jpg"
+      ],
+      "listed_at": "2026-07-26T09:00:00Z"
+    }
+  ]
+}
