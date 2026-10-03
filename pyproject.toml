@@ -88,7 +88,10 @@ ignore = [
 ]
 
 [tool.ruff.lint.per-file-ignores]
-"tests/**/*.py" = ["D", "S101", "ANN"]   # asserts and undocumented fixtures are fine in tests
+# Asserts and undocumented fixtures are fine in tests. ARG too: a test double
+# that stands in for a Protocol or an ABC has to accept the arguments the real
+# implementation is handed, whether or not that particular fake reads them.
+"tests/**/*.py" = ["D", "S101", "ANN", "ARG"]
 "src/mta/dashboard/**/*.py" = ["D103"]   # Streamlit render functions read top-to-bottom
 
 [tool.ruff.lint.pydocstyle]
