@@ -1,17 +1,10 @@
-"""Client-side request throttling for the ingestion layer.
+"""Client-side request throttling.
 
-A token bucket is the right shape for this problem because marketplace traffic
-is naturally bursty — a search page yields twenty listing URLs at once — but the
-*sustained* rate is what a server actually cares about. The bucket lets you
-spend a small burst immediately and then paces you at the refill rate, instead
-of either serialising everything (slow, and no smoother from the server's point
-of view) or firing twenty concurrent requests (fast, rude, and the quickest way
-to earn an IP block).
-
-The throttle is deliberately separated from the HTTP client so that a single
-bucket can be shared across every coroutine hitting one host. Two scrapers each
-holding their own "10 requests per minute" limiter are, from the server's
-perspective, a scraper doing 20.
+A token bucket fits because marketplace traffic is naturally bursty (a search
+page yields twenty listing URLs at once) but the sustained rate is what a
+server cares about. The throttle is separate from the HTTP client so one bucket
+can be shared across every coroutine hitting one host: two scrapers each
+holding their own "10 per minute" limiter are, to the server, one doing 20.
 """
 
 from __future__ import annotations
@@ -24,8 +17,7 @@ from typing import Protocol, Self, runtime_checkable
 
 logger = logging.getLogger(__name__)
 
-#: Refuse to construct a limiter that would sleep implausibly long for one token.
-#: Guards against a misconfigured ``requests_per_minute`` of, say, 0.001.
+#: Refuse a limiter that would sleep implausibly long for one token.
 _MAX_REASONABLE_WAIT_SECONDS = 3600.0
 
 
@@ -33,38 +25,33 @@ _MAX_REASONABLE_WAIT_SECONDS = 3600.0
 class RateLimiter(Protocol):
     """The throttling contract the HTTP layer depends on.
 
-    A ``Protocol`` rather than a base class so that tests can substitute a
-    no-op implementation without inheriting anything, and so the HTTP client's
-    dependency is "something that can be acquired from" rather than "this
-    specific class". Structural typing is the lighter-weight seam here.
+    A Protocol rather than a base class, so the dependency is "something that
+    can be acquired from" and tests can substitute without inheriting.
     """
 
     async def acquire(self, tokens: float = 1.0) -> float:
-        """Block until ``tokens`` may be spent, returning seconds spent waiting."""
+        """Block until tokens may be spent, returning seconds spent waiting."""
         ...
 
     def penalize(self, seconds: float) -> None:
-        """Suspend all issuance for ``seconds``, e.g. on a server ``Retry-After``."""
+        """Suspend all issuance for a period, e.g. on a server Retry-After."""
         ...
 
 
 class TokenBucketRateLimiter:
     """An asyncio-safe token bucket shared across concurrent requests.
 
-    Tokens accrue continuously at ``requests_per_minute / 60`` per second, up to
-    ``burst`` in reserve. Each request spends one.
+    Tokens accrue at requests_per_minute / 60 per second, up to burst in
+    reserve. Each request spends one.
 
-    The default ``burst`` of 1 means *strictly spaced* requests: no bursting at
-    all. That is the conservative default on purpose — for this project the cost
-    of being slightly slower is nothing, and the cost of being impolite to a
-    marketplace is the whole project. Raise it deliberately if a source
-    genuinely tolerates bursts.
+    The default burst of 1 means strictly spaced requests. That is the
+    conservative default on purpose: being slightly slower costs nothing here,
+    and being impolite to a marketplace costs the project.
 
-    Concurrency note: :meth:`acquire` holds its lock across the sleep. That
-    serialises waiters, which costs a little throughput and buys two things
-    worth more — the budget can never be oversubscribed by racing coroutines,
-    and waiters are served roughly first-come-first-served instead of one
-    unlucky coroutine starving while others repeatedly win the race.
+    acquire holds its lock across the sleep. That serialises waiters, which
+    costs a little throughput and buys two things worth more: the budget cannot
+    be oversubscribed by racing coroutines, and waiters are served roughly
+    first-come-first-served instead of one starving while others win the race.
 
     Attributes:
         requests_per_minute: Sustained issuance rate.
@@ -80,9 +67,8 @@ class TokenBucketRateLimiter:
 
         Raises:
             ValueError: If the rate or burst is non-positive, or if the rate is
-                so low that a single token would take over an hour to accrue —
-                almost always a units mistake (per *hour* typed into a per
-                *minute* field) rather than an intent.
+                so low that one token would take over an hour to accrue, which
+                is almost always a units mistake.
         """
         if requests_per_minute <= 0:
             raise ValueError(f"requests_per_minute must be positive, got {requests_per_minute}.")
@@ -101,36 +87,33 @@ class TokenBucketRateLimiter:
             )
 
         self._tokens = float(burst)
-        # Monotonic, not wall clock: a clock adjustment or DST change must not
-        # hand out a windfall of tokens or hang the bucket for an hour.
+        # Monotonic, not wall clock: a clock adjustment must not hand out a
+        # windfall of tokens or hang the bucket for an hour.
         self._last_refill = time.monotonic()
         self._blocked_until = 0.0
         self._lock = asyncio.Lock()
 
     def _refill(self) -> None:
-        """Credit tokens accrued since the last refill. Caller must hold the lock."""
+        """Credit tokens accrued since the last refill. Caller holds the lock."""
         now = time.monotonic()
         elapsed = now - self._last_refill
         self._last_refill = now
         self._tokens = min(float(self.burst), self._tokens + elapsed * self._refill_per_second)
 
     async def acquire(self, tokens: float = 1.0) -> float:
-        """Wait until ``tokens`` are available, then spend them.
+        """Wait until tokens are available, then spend them.
 
         Args:
-            tokens: Cost of the operation. Values above 1 let an expensive call
-                (an image download, say) consume proportionally more budget.
+            tokens: Cost of the operation. Above 1 lets an expensive call
+                consume proportionally more budget.
 
         Returns:
-            Seconds spent waiting. Returned rather than merely logged so callers
-            can surface real throttling cost in run statistics — "this run took
-            eleven minutes, nine of them waiting" is the kind of number that
-            tells you whether to parallelise or to slow down.
+            Seconds spent waiting, so callers can report real throttling cost
+            in run statistics.
 
         Raises:
-            ValueError: If ``tokens`` exceeds the bucket's capacity, which would
-                otherwise deadlock forever waiting for a level the bucket can
-                never reach.
+            ValueError: If tokens exceeds the bucket's capacity, which would
+                otherwise wait forever for a level it can never reach.
         """
         if tokens > self.burst:
             raise ValueError(
@@ -164,15 +147,10 @@ class TokenBucketRateLimiter:
     def penalize(self, seconds: float) -> None:
         """Suspend all issuance for a period, on the server's instruction.
 
-        Called when a response carries ``429 Too Many Requests`` or a
-        ``Retry-After`` header. This is the important half of rate limiting that
-        client-side budgets alone miss: your own estimate of a polite rate is a
-        guess, but a 429 is the server telling you the answer. Ignoring it and
-        continuing to drip requests at the configured rate is how a temporary
-        throttle becomes a permanent ban.
-
-        Extends but never shortens an existing penalty, so overlapping 429s from
-        concurrent requests cannot accidentally release the block early.
+        This is the half of rate limiting that client-side budgets miss: a
+        polite local rate is a guess, a 429 is the answer. Extends but never
+        shortens an existing penalty, so overlapping 429s from concurrent
+        requests cannot release the block early.
 
         Args:
             seconds: How long to suspend issuance. Non-positive values are
@@ -184,7 +162,7 @@ class TokenBucketRateLimiter:
         logger.warning("Rate limiter penalised for %.1fs by server instruction.", seconds)
 
     async def __aenter__(self) -> Self:
-        """Acquire one token, for use as ``async with limiter:``."""
+        """Acquire one token, for use as `async with limiter:`."""
         await self.acquire()
         return self
 
@@ -194,23 +172,19 @@ class TokenBucketRateLimiter:
         exc: BaseException | None,
         tb: TracebackType | None,
     ) -> None:
-        """Release nothing — tokens are spent on acquisition, not held."""
-        return None
+        """Release nothing: tokens are spent on acquisition, not held."""
 
 
 class NoOpRateLimiter:
-    """A limiter that never delays, for sources that perform no network I/O.
+    """A limiter that never delays, for sources with no network I/O.
 
-    Used by the fixture replay source and by unit tests. Exists so that calling
-    code never needs an ``if self.limiter is not None`` branch — the null object
-    is cheaper than the conditional, and it keeps the throttled and unthrottled
-    paths identical so tests exercise the real code path.
+    Exists so calling code never needs an `if self.limiter is not None` branch,
+    and so the throttled and unthrottled paths stay identical.
     """
 
-    async def acquire(self, tokens: float = 1.0) -> float:
+    async def acquire(self, tokens: float = 1.0) -> float:  # noqa: ARG002 - protocol conformance
         """Return immediately, having waited zero seconds."""
         return 0.0
 
-    def penalize(self, seconds: float) -> None:
+    def penalize(self, seconds: float) -> None:  # noqa: ARG002 - protocol conformance
         """Ignore the penalty; there is no remote server to be polite to."""
-        return None
