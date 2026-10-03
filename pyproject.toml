@@ -51,6 +51,7 @@ dev = [
     "mypy>=1.13",
     "pre-commit>=4.0",
     "types-beautifulsoup4",
+    "pandas-stubs",
 ]
 postgres = ["psycopg[binary]>=3.2"]
 

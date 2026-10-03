@@ -27,6 +27,8 @@ Ingestion  ──▶  Processing & AI  ──▶  Storage  ──▶  Presentati
 | Storage | `src/mta/storage/` | Normalized schema, idempotent upserts. |
 | Presentation | `src/mta/dashboard/` | Streamlit dashboard over the warehouse. |
 
+`src/mta/pipeline/` wires the layers together and hosts the `mta` CLI.
+
 ### Design decisions
 
 - **`Decimal` everywhere for money.** Float arithmetic on prices is a reconciliation bug waiting for scale.
@@ -40,10 +42,11 @@ Ingestion  ──▶  Processing & AI  ──▶  Storage  ──▶  Presentati
 Depop and ThredUp both prohibit automated collection in their terms of service, and neither publishes a public listings API.
 
 - The **default ingestion source is an offline fixture replay.** A fresh clone runs the full pipeline with no network access and no credentials.
+- Live sources also need `MTA_AUTHORISED_TO_COLLECT=true`, and honour the site's `robots.txt`.
 - A **politeness ceiling is enforced at startup.** Configuring a live source above 30 requests/minute is a hard configuration error, not a warning.
 - `Retry-After` and `429` responses are honoured, and the client backs off on the server's instruction rather than its own estimate.
 
-The live adapters exist to demonstrate the abstraction. Point them at anything you are authorised to collect from.
+The live adapters read schema.org JSON-LD product data rather than CSS selectors. Their URL patterns are defaults and have not been verified against the live sites. They exist to demonstrate the abstraction: point them at anything you are authorised to collect from.
 
 ## Running it
 
@@ -54,12 +57,23 @@ pip install -e ".[dev]"
 
 cp .env.example .env              # optional, every setting has a default
 
+mta run -q "vintage carhartt jacket"   # ingest, classify, value, store
+mta top                                # listings that clear the buy bar (--all to see everything)
+mta stats                              # warehouse summary by trend
+mta dashboard                          # Streamlit UI
+
 pytest                            # offline, no credentials required
 ```
 
+With no `ANTHROPIC_API_KEY` the classifier falls back to a keyword reader of the listing text, and `mta run` works fully offline against the recorded fixtures. Set a key to classify from the photographs instead (`--classifier anthropic` forces it).
+
+### Valuation
+
+Resale value blends the median of comparable stored listings (same category, currency and brand, similar title, restated for condition) with the model's own estimate, weighting comps more as they accumulate. Confidence is discounted when there are no comps. `arbitrage_score` is the confidence times a saturating function of return on capital.
+
 ### Tests
 
-176 tests, no network, no credentials, about seven seconds. The HTTP tests mock at the httpx *transport* layer with `respx`, so the client under test is the real one with only the socket replaced. The ingestion tests replay the same recorded payloads the default pipeline run reads.
+255 tests, no network, no credentials, about ten seconds. The HTTP tests mock at the httpx *transport* layer with `respx`, so the client under test is the real one with only the socket replaced. The ingestion tests replay the same recorded payloads the default pipeline run reads.
 
 ## Status
 
@@ -69,11 +83,11 @@ pytest                            # offline, no credentials required
 - [x] Ingestion contract: `ListingSource` ABC, token-bucket rate limiter
 - [x] Shared HTTP transport: retries, backoff, payload archiving
 - [x] Offline fixture source and recorded payloads
-- [ ] Live platform adapters (Depop, ThredUp)
-- [ ] Vision classification and structured output parsing
-- [ ] Comparables and arbitrage scoring
-- [ ] Storage schema and repository
-- [ ] Streamlit dashboard
+- [x] Live platform adapters (Depop, ThredUp)
+- [x] Vision classification and structured output parsing
+- [x] Comparables and arbitrage scoring
+- [x] Storage schema and repository
+- [x] Streamlit dashboard
 
 ## Tech stack
 

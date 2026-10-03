@@ -90,6 +90,10 @@ class Settings(BaseSettings):
         le=100,
         description="Hard stop on pagination, in case a 'next page' selector loops.",
     )
+    authorised_to_collect: bool = Field(
+        default=False,
+        description="Must be true to run a live source. Confirms you may collect from it.",
+    )
     user_agent: str = Field(
         default="micro-trend-arbitrage-engine/0.1 (portfolio project)",
         min_length=10,
@@ -107,7 +111,7 @@ class Settings(BaseSettings):
         ),
     )
     vision_model: str = Field(
-        default="claude-opus-5",
+        default="claude-opus-5-5",
         min_length=1,
         description="Model ID for trend classification. Recorded on every assessment.",
     )

@@ -1,1 +1,1 @@
-"""Processing and AI layer: normalization, classification, and valuation."""
+"""Normalization, trend classification and valuation."""

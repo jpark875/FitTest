@@ -1,1 +1,1 @@
-"""Pipeline orchestration and command-line entrypoints."""
+"""Pipeline orchestration and the command-line entry point."""

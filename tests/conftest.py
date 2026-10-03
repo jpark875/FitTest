@@ -76,7 +76,7 @@ def assessment() -> TrendAssessment:
         style_confidence=0.82,
         estimated_retail_value=Decimal("90.00"),
         reasoning="Duck canvas, blanket lining and a squared cut read as 90s workwear.",
-        model_id="claude-opus-5",
+        model_id="claude-opus-5-5",
         prompt_version="v1",
     )
 
