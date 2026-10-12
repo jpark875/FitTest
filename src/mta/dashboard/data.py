@@ -66,7 +66,7 @@ def load_frame(
     min_confidence: float,
     trends: Sequence[TrendTag] | None = None,
 ) -> pd.DataFrame:
-    """Opportunities clearing every floor, best first. On-trend listings only."""
+    """Opportunities clearing every floor, best first."""
     items = [
         o
         for o in repository.opportunities(

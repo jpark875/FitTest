@@ -1,10 +1,4 @@
-"""Live marketplace adapters built on schema.org structured data.
-
-Listing pages that publish JSON-LD (`Product` or `ItemList`) are parsed from that rather than
-from CSS selectors, which break on every redesign. The URL patterns below are defaults and
-have not been verified against the live sites; both platforms prohibit automated
-collection, so only point these at services you are authorised to collect from.
-"""
+"""Live marketplace adapters built on schema.org structured data."""
 
 from __future__ import annotations
 

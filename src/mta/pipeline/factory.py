@@ -17,7 +17,7 @@ ClassifierChoice = Literal["auto", "keyword", "anthropic"]
 
 
 def build_source(settings: Settings) -> ListingSource:
-    """Create the configured source. Live sources need explicit authorisation."""
+    """Create the configured source."""
     if settings.ingestion_source is Platform.FIXTURE:
         return FixtureSource(settings.fixtures_dir)
 

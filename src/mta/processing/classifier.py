@@ -88,11 +88,7 @@ def _listing_text(listing: RawListing) -> str:
 
 
 class KeywordClassifier:
-    """Offline fallback that reads the seller's text. Cheap, deterministic, and weaker.
-
-    It cannot see the garment, so confidence is capped well below what a vision model
-    can report.
-    """
+    """Offline fallback that reads the seller's text."""
 
     prompt_version = "kw1"
     max_confidence = 0.85

@@ -1,9 +1,4 @@
-"""Tests for the shared HTTP transport.
-
-respx intercepts at the httpx transport layer, so the client under test is the
-real one (real retry policy, real status translation, real throttling) with only
-the socket replaced.
-"""
+"""Tests for the shared HTTP transport."""
 
 from __future__ import annotations
 

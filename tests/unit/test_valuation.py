@@ -73,7 +73,6 @@ class TestValueListing:
         assert valuation.estimated_resale_value == Decimal("90.00")
         assert valuation.comparable_count == 0
         assert valuation.median_comp_price is None
-        # 90 - 9.00 fees - 4.50 postage = 76.50 proceeds on a 25.00 buy.
         assert valuation.net_proceeds == Decimal("76.50")
         assert valuation.absolute_margin == Decimal("51.50")
         assert valuation.valuation_confidence == pytest.approx(0.82 * 0.8, abs=1e-4)

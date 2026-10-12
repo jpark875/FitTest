@@ -1,4 +1,4 @@
-"""SQLAlchemy schema. Money is stored as integer minor units so SQLite stays exact."""
+"""SQLAlchemy schema."""
 
 from __future__ import annotations
 
@@ -103,7 +103,7 @@ class AssessmentRow(Base):
 
 
 class ValuationRow(Base):
-    """The latest valuation for a listing. Margins are stored for SQL ranking."""
+    """The latest valuation for a listing."""
 
     __tablename__ = "valuations"
 

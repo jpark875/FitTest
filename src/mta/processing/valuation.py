@@ -101,11 +101,7 @@ def value_listing(
     platform_fee_rate: Decimal,
     shipping_cost: Decimal,
 ) -> Valuation:
-    """Blend the comp median with the model's estimate and compute margins net of fees.
-
-    With no estimate from either source the resale value falls back to the asking price
-    and confidence is zero, so the row ranks last instead of vanishing.
-    """
+    """Blend the comp median with the model's estimate and compute margins net of fees."""
     model_estimate = assessment.estimated_retail_value
     comp_estimate = _comp_estimate(comps, listing.condition)
     weight = comp_weight(len(comps)) if comp_estimate is not None else 0.0

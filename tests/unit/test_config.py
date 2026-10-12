@@ -1,9 +1,4 @@
-"""Tests for the configuration surface.
-
-The politeness ceiling and the credential guard get the most attention: one is
-a policy commitment, the other is the difference between a readable startup
-error and a library stack trace.
-"""
+"""Tests for the configuration surface."""
 
 from __future__ import annotations
 

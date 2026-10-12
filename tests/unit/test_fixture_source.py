@@ -1,8 +1,4 @@
-"""Tests for the offline fixture replay source.
-
-These back the claim that a fresh clone runs the pipeline end to end with no
-network and no credentials: they read the same recordings the default run reads.
-"""
+"""Tests for the offline fixture replay source."""
 
 from __future__ import annotations
 

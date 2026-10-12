@@ -1,8 +1,4 @@
-"""Shared test fixtures.
-
-The suite runs offline: HTTP tests mock at the httpx transport layer, and
-ingestion tests replay recorded payloads from tests/fixtures/.
-"""
+"""Shared test fixtures."""
 
 from __future__ import annotations
 
@@ -30,13 +26,7 @@ FIXTURES_DIR = Path(__file__).parent / "fixtures"
 
 @pytest.fixture(scope="session", autouse=True)
 def _shared_trust_store() -> Iterator[None]:
-    """Load the CA bundle once rather than once per httpx client.
-
-    Each AsyncClient reads certifi's PEM into a fresh SSLContext, which costs
-    about half a second on Windows. Invisible in production (one client per
-    run), but the HTTP tests build one per test. Patched where the name is
-    looked up, since the transport module binds it at import time.
-    """
+    """Load the CA bundle once rather than once per httpx client."""
     cached = httpx._config.create_ssl_context()
     with mock.patch.object(httpx._transports.default, "create_ssl_context", return_value=cached):
         yield

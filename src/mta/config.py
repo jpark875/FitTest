@@ -1,14 +1,4 @@
-"""Typed configuration loaded from the environment.
-
-Every operational knob is a validated field here rather than a literal buried
-in the module that uses it, so it can be tuned per platform, tightened in
-tests, and audited.
-
-This module is imported by the composition root (the CLI and the dashboard
-entrypoint) and by almost nothing else. Layers receive the primitives they
-need, so each stays testable with literals and Settings does not become a god
-object.
-"""
+"""Typed configuration loaded from the environment."""
 
 from __future__ import annotations
 
@@ -38,21 +28,11 @@ _SUPPORTED_DB_SCHEMES = ("sqlite", "postgresql")
 
 
 class ConfigurationError(RuntimeError):
-    """Raised when the environment cannot produce usable Settings.
-
-    Distinct from ValidationError so the CLI can catch exactly this and print
-    an actionable message instead of a library stack trace.
-    """
+    """Raised when the environment cannot produce usable Settings."""
 
 
 class Settings(BaseSettings):
-    """Runtime configuration, resolved from .env and the process environment.
-
-    Environment variables beat .env, which beats the defaults here. That is
-    what lets one image run locally off a file and in CI off injected secrets
-    with no conditional logic. Frozen, because configuration that mutates at
-    runtime cannot be reasoned about from a log line.
-    """
+    """Runtime configuration, resolved from .env and the process environment."""
 
     model_config = SettingsConfigDict(
         env_file=".env",
@@ -62,8 +42,6 @@ class Settings(BaseSettings):
         extra="ignore",
         frozen=True,
     )
-
-    # -- Ingestion ---------------------------------------------------------- #
 
     ingestion_source: Platform = Field(
         default=Platform.FIXTURE,
@@ -100,8 +78,6 @@ class Settings(BaseSettings):
         description="Sent on every request.",
     )
 
-    # -- Processing --------------------------------------------------------- #
-
     anthropic_api_key: SecretStr | None = Field(
         default=None,
         validation_alias="ANTHROPIC_API_KEY",
@@ -126,8 +102,6 @@ class Settings(BaseSettings):
     llm_timeout_seconds: float = Field(
         default=120.0, gt=0, description="Vision calls over several images are slow."
     )
-
-    # -- Storage ------------------------------------------------------------ #
 
     database_url: str = Field(
         default="sqlite:///data/warehouse/mta.db",
@@ -163,14 +137,10 @@ class Settings(BaseSettings):
         default=Decimal("4.50"), ge=Decimal(0), description="Assumed postage per item."
     )
 
-    # -- Observability ------------------------------------------------------ #
-
     log_level: Literal["DEBUG", "INFO", "WARNING", "ERROR"] = "INFO"
     log_format: Literal["console", "json"] = Field(
         default="console", description="'console' for local runs, 'json' for anything shipped."
     )
-
-    # -- Paths -------------------------------------------------------------- #
 
     project_root: Path = Field(
         default_factory=lambda: Path(__file__).resolve().parents[2],
@@ -179,16 +149,12 @@ class Settings(BaseSettings):
 
     @property
     def data_dir(self) -> Path:
-        """Root of all generated data. Gitignored; safe to delete and rebuild."""
+        """Root of all generated data."""
         return self.project_root / "data"
 
     @property
     def raw_dir(self) -> Path:
-        """Landing zone for unparsed payloads.
-
-        Persisting the raw response before parsing is what makes a scraper
-        debuggable once a selector breaks.
-        """
+        """Landing zone for unparsed payloads."""
         return self.data_dir / "raw"
 
     @property
@@ -203,14 +169,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _enforce_polite_rate(self) -> Self:
-        """Refuse to run a live source above the politeness ceiling.
-
-        A hard failure rather than a warning: a warning is a thing you scroll
-        past, a startup error is a thing you make a decision about.
-
-        Raises:
-            ValueError: If a live source exceeds POLITE_RPM_CEILING.
-        """
+        """Refuse to run a live source above the politeness ceiling."""
         if self.ingestion_source is Platform.FIXTURE:
             return self
         if self.requests_per_minute > POLITE_RPM_CEILING:
@@ -224,14 +183,7 @@ class Settings(BaseSettings):
 
     @model_validator(mode="after")
     def _validate_database_url(self) -> Self:
-        """Reject URLs the storage layer cannot open.
-
-        Caught at startup rather than minutes into a run, when the first write
-        is attempted and the scraped batch is lost.
-
-        Raises:
-            ValueError: If the scheme is not a supported backend.
-        """
+        """Reject URLs the storage layer cannot open."""
         scheme = self.database_url.split(":", 1)[0].split("+", 1)[0]
         if scheme not in _SUPPORTED_DB_SCHEMES:
             raise ValueError(
@@ -240,18 +192,7 @@ class Settings(BaseSettings):
         return self
 
     def require_api_key(self) -> str:
-        """Return the API key, or fail with an actionable message.
-
-        Checked at the point of use, not at load time: the dashboard reads the
-        warehouse and never calls a model, so requiring a key to look at
-        yesterday's results would be a self-inflicted wound.
-
-        Returns:
-            The key as a plain string, for handing to the SDK.
-
-        Raises:
-            ConfigurationError: If no key is configured.
-        """
+        """Return the API key, or fail with an actionable message."""
         if self.anthropic_api_key is None:
             raise ConfigurationError(
                 "ANTHROPIC_API_KEY is not set. Copy .env.example to .env and add your "
@@ -260,14 +201,7 @@ class Settings(BaseSettings):
         return self.anthropic_api_key.get_secret_value()
 
     def ensure_directories(self) -> None:
-        """Create the generated-data directories. Idempotent.
-
-        Called once by the composition root so no downstream module has to
-        defend against a missing parent.
-
-        Raises:
-            ConfigurationError: If a directory cannot be created.
-        """
+        """Create the generated-data directories."""
         for directory in (self.raw_dir, self.warehouse_dir):
             try:
                 directory.mkdir(parents=True, exist_ok=True)
@@ -279,19 +213,7 @@ class Settings(BaseSettings):
 
 @lru_cache(maxsize=1)
 def get_settings() -> Settings:
-    """Load and cache the application settings.
-
-    Cached so one process cannot observe two configurations partway through a
-    run.
-
-    Returns:
-        The validated, frozen Settings singleton.
-
-    Raises:
-        ConfigurationError: If the environment fails validation. Re-raised as a
-            flat list of field: reason lines, since whoever hits this is
-            usually setting the project up for the first time.
-    """
+    """Load and cache the application settings."""
     try:
         return Settings()
     except ValidationError as exc:

@@ -1,9 +1,4 @@
-"""Tests for the shared scraping loop.
-
-Every adapter inherits the template method, so a bug here is a bug in every
-platform at once. It is driven through a fake source whose pages are scripted
-per test, including pages that raise.
-"""
+"""Tests for the shared scraping loop."""
 
 from __future__ import annotations
 

@@ -1,26 +1,4 @@
-"""The single network boundary of the ingestion layer.
-
-Every outbound request goes through ThrottledHttpClient, which buys four things
-that are painful to retrofit once a second scraper exists:
-
-- One translation point. httpx exceptions and status codes become this
-  package's exceptions in exactly one place, so no scraper can invent its own
-  retry policy.
-- One throttle. The limiter is applied per attempt, including retries.
-- One archive. Raw payloads are written to data/raw/ before parsing, so a
-  selector that breaks later can be debugged against the bytes that broke it.
-- One place to be polite. User agent, timeouts and redirect handling are set
-  once and cannot drift per platform.
-
-Retries use exponential backoff with jitter. The jitter matters: without it,
-coroutines that fail together retry together against a server that is already
-struggling. Only TransientIngestionError is retried.
-
-RateLimitedError is the deliberate exception to that. It is transient, but the
-server has stated a wait, and answering a stated wait with our own shorter
-guess is worse than not retrying at all. It propagates on the first response so
-the caller can penalise the shared limiter by the server's figure.
-"""
+"""The single network boundary of the ingestion layer."""
 
 from __future__ import annotations
 
@@ -64,20 +42,7 @@ _RATE_LIMIT_STATUS = frozenset({429, 503})
 
 
 def parse_retry_after(value: str | None) -> float | None:
-    """Interpret a Retry-After header in either of its legal forms.
-
-    RFC 9110 permits a delay in seconds and an absolute HTTP date. Real servers
-    use both, and handling only the integer form ignores the instruction from
-    the ones that use dates, typically the CDNs in front of exactly the sites
-    worth being careful with.
-
-    Args:
-        value: The raw header value, or None if absent.
-
-    Returns:
-        Seconds to wait, clamped to MAX_HONOURED_RETRY_AFTER_SECONDS, or None
-        if the header is absent or unparseable.
-    """
+    """Interpret a Retry-After header in either of its legal forms."""
     if not value:
         return None
 
@@ -100,14 +65,7 @@ def parse_retry_after(value: str | None) -> float | None:
 
 
 class ThrottledHttpClient:
-    """A rate-limited, retrying HTTP client speaking the ingestion exceptions.
-
-    Takes primitives rather than a settings object: the contract is "a timeout,
-    a retry count, and something to throttle against".
-
-    One instance should be shared across every source hitting the same host, so
-    the connection pool and the rate limiter are genuinely shared.
-    """
+    """A rate-limited, retrying HTTP client speaking the ingestion exceptions."""
 
     def __init__(
         self,
@@ -119,22 +77,7 @@ class ThrottledHttpClient:
         rate_limiter: RateLimiter | None = None,
         archive_dir: Path | None = None,
     ) -> None:
-        """Configure the client.
-
-        Args:
-            user_agent: Sent on every request. A contact address in the string
-                costs nothing and occasionally turns a block into an email.
-            timeout_seconds: Per-attempt ceiling covering connect, read and
-                write, so worst-case wall time is roughly
-                timeout x (max_retries + 1) plus backoff.
-            max_retries: Additional attempts after the first. 0 disables them.
-            retry_backoff_seconds: Base delay before the first retry, doubling
-                with jitter thereafter. A parameter, not a literal, so it can
-                be tuned per platform and tightened in tests.
-            rate_limiter: Shared throttle. Defaults to no-op, which is only
-                appropriate for tests and offline sources.
-            archive_dir: If given, raw payloads are written here before parsing.
-        """
+        """Configure the client."""
         self.user_agent = user_agent
         self.timeout_seconds = timeout_seconds
         self.max_retries = max_retries
@@ -160,24 +103,7 @@ class ThrottledHttpClient:
         params: dict[str, Any] | None = None,
         archive_key: str | None = None,
     ) -> str:
-        """Fetch a URL, retrying transient failures, and return the body.
-
-        Args:
-            url: Absolute URL to fetch.
-            params: Query parameters.
-            archive_key: Filename stem for the raw payload archive. Nothing is
-                written when this or archive_dir is None.
-
-        Returns:
-            The response body decoded as text.
-
-        Raises:
-            RateLimitedError: On 429, or 503 with a Retry-After.
-            TransientIngestionError: All attempts failed with a retryable
-                condition.
-            PermanentIngestionError: 403, 404, an oversized response, or too
-                many redirects.
-        """
+        """Fetch a URL, retrying transient failures, and return the body."""
         attempts = self.max_retries + 1
         async for attempt in AsyncRetrying(
             # RateLimitedError subclasses TransientIngestionError, so without
@@ -201,11 +127,7 @@ class ThrottledHttpClient:
         raise TransientIngestionError(f"Exhausted all attempts for {url}.")
 
     async def aclose(self) -> None:
-        """Close the underlying connection pool.
-
-        A leaked pool surfaces as an unclosed-session warning at exit and, in a
-        long-running process, as file descriptors that never come back.
-        """
+        """Close the underlying connection pool."""
         await self._client.aclose()
 
     async def __aenter__(self) -> Self:
@@ -228,26 +150,7 @@ class ThrottledHttpClient:
         params: dict[str, Any] | None,
         archive_key: str | None,
     ) -> str:
-        """Perform one throttled request and translate its outcome.
-
-        Throttling happens inside the retried unit so retries spend budget like
-        any other request. Acquiring outside the retry loop would let a request
-        that fails ten times send eleven requests on one token.
-
-        Args:
-            url: Absolute URL to fetch.
-            params: Query parameters.
-            archive_key: Filename stem for the archive, or None.
-
-        Returns:
-            The response body as text.
-
-        Raises:
-            RateLimitedError: On 429, or 503 carrying a Retry-After.
-            TransientIngestionError: On timeout, connection failure, or 5xx.
-            PermanentIngestionError: On other 4xx, oversized bodies, or
-                redirect loops.
-        """
+        """Perform one throttled request and translate its outcome."""
         self.seconds_throttled += await self.rate_limiter.acquire()
 
         try:
@@ -276,21 +179,7 @@ class ThrottledHttpClient:
         return body
 
     def _raise_for_status(self, response: httpx.Response, url: str) -> None:
-        """Map an HTTP status code onto the ingestion exceptions.
-
-        429 and 503-with-Retry-After are checked first: they carry an explicit
-        instruction from the server, which outranks any local guess about
-        whether the failure is retryable.
-
-        Args:
-            response: The response to inspect.
-            url: The requested URL, for error messages.
-
-        Raises:
-            RateLimitedError: On 429, or 503 with a Retry-After header.
-            TransientIngestionError: On other retryable statuses.
-            PermanentIngestionError: On statuses retrying cannot fix.
-        """
+        """Map an HTTP status code onto the ingestion exceptions."""
         status = response.status_code
         if status < 400:
             return
@@ -318,16 +207,7 @@ class ThrottledHttpClient:
         raise PermanentIngestionError(f"{status} from {url}.")
 
     def _archive(self, key: str, body: str) -> None:
-        """Persist a raw payload for later debugging.
-
-        Best-effort by design: the listings are the deliverable, the archive is
-        a convenience, and a full disk must not abort a scrape that is
-        otherwise succeeding.
-
-        Args:
-            key: Filename stem, typically platform-queryslug-pN.
-            body: The raw response text.
-        """
+        """Persist a raw payload for later debugging."""
         if self.archive_dir is None:
             return
 

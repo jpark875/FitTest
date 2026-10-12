@@ -45,10 +45,7 @@ async def run_pipeline(
     shipping_cost: Decimal,
     concurrency: int = 4,
 ) -> RunReport:
-    """Ingest a query, store everything, then value each listing against what is stored.
-
-    Listings are stored before any is valued so comparables include the rest of the batch.
-    """
+    """Ingest a query, store everything, then value each listing against what is stored."""
     report = RunReport()
     listings: list[RawListing] = []
     async with source:

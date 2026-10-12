@@ -43,7 +43,7 @@ class Opportunity:
 
 
 class Repository:
-    """Thin persistence layer over SQLAlchemy. Sessions are short-lived and per call."""
+    """Thin persistence layer over SQLAlchemy."""
 
     def __init__(self, url: str, *, echo: bool = False) -> None:
         """Open the database, creating the parent directory for file-backed SQLite."""
@@ -54,7 +54,7 @@ class Repository:
         self._sessions = sessionmaker(self.engine, expire_on_commit=False)
 
     def create_schema(self) -> None:
-        """Create any missing tables. Idempotent."""
+        """Create any missing tables."""
         Base.metadata.create_all(self.engine)
 
     def dispose(self) -> None:
@@ -72,10 +72,8 @@ class Repository:
                 session.rollback()
                 raise
 
-    # -- Writes ------------------------------------------------------------- #
-
     def upsert_listing(self, listing: RawListing) -> bool:
-        """Insert or refresh a listing by fingerprint. Returns True if it was new."""
+        """Insert or refresh a listing by fingerprint."""
         with self.session() as session:
             row = session.scalar(
                 select(ListingRow).where(ListingRow.fingerprint == listing.fingerprint)
@@ -166,8 +164,6 @@ class Repository:
         if listing_id is None:
             raise LookupError(f"listing {fingerprint} is not stored")
         return listing_id
-
-    # -- Reads -------------------------------------------------------------- #
 
     def count_listings(self) -> int:
         """Number of stored listings."""

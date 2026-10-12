@@ -1,4 +1,4 @@
-"""Streamlit dashboard. Run with `streamlit run src/mta/dashboard/app.py` or `mta dashboard`."""
+"""Streamlit dashboard."""
 
 from __future__ import annotations
 

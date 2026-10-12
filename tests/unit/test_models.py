@@ -1,8 +1,4 @@
-"""Contract tests for the domain models.
-
-The money arithmetic is the most expensive thing here to get wrong and the
-cheapest to test, so it is covered exhaustively.
-"""
+"""Contract tests for the domain models."""
 
 from __future__ import annotations
 

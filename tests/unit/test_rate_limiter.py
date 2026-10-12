@@ -1,8 +1,4 @@
-"""Tests for the token bucket.
-
-Rates are fast enough to keep the suite quick but slow enough that a broken
-bucket cannot pass by accident: at 1200/min a token takes 50ms.
-"""
+"""Tests for the token bucket."""
 
 from __future__ import annotations
 
